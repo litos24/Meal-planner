@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Our Meal Planner</title>
+<style>
+:root{--g:#245c4a;--m:#eaf3ed;--c:#fffaf1;--o:#d97845;--t:#24352e;--mut:#718078;--l:#d8e4dc}
+*{box-sizing:border-box}body{margin:0;background:#f2f5f1;color:var(--t);font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:760px;margin:auto;min-height:100vh;background:var(--c)}
+header{padding:22px 18px;background:var(--g);color:#fff}header h1{margin:0;font-size:26px}header p{margin:5px 0 0;color:#dbece1}
+nav{display:flex;gap:7px;overflow:auto;padding:10px;background:#fff;border-bottom:1px solid var(--l);position:sticky;top:0;z-index:2}nav button{border:0;border-radius:20px;padding:9px 14px;white-space:nowrap;color:var(--g);background:#edf3ef;font-weight:800}nav button.active{background:var(--g);color:#fff}
+main{padding:18px}section{display:none}section.active{display:block}.eyebrow{color:var(--o);font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}h2{margin:5px 0 8px;font-size:25px}h3{margin:0 0 10px}p{line-height:1.45}.muted{color:var(--mut)}
+.card{margin:12px 0;padding:16px;background:#fff;border:1px solid var(--l);border-radius:18px;box-shadow:0 3px 12px #245c4a0d}.soft{background:var(--m);border-color:#c9dfd0}
+label{display:block;margin:13px 0 6px;font-weight:800}input,select,textarea{width:100%;padding:12px;border:1px solid #cbd9d0;border-radius:12px;background:#fff;color:var(--t);font:inherit}textarea{min-height:70px}
+.btn{padding:11px 15px;border:0;border-radius:12px;background:var(--g);color:#fff;font:inherit;font-weight:800;cursor:pointer}.btn.orange{background:var(--o)}.btn.light{background:#edf3ef;color:var(--g)}.btn.danger{background:#fff0ec;color:#a5422b}.btn.small{padding:7px 10px;font-size:13px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.choice{display:flex;gap:10px;align-items:flex-start;margin:8px 0;padding:12px;border:1px solid var(--l);border-radius:13px;background:#fff}.choice.selected{border-color:var(--o);background:#fff5ed}.choice input{width:auto;margin-top:3px;accent-color:var(--o)}.choice strong{display:block}.choice small{display:block;margin-top:3px;color:var(--mut)}
+.tag{display:inline-block;margin:3px;padding:4px 8px;border-radius:20px;background:#e4f0e8;color:var(--g);font-size:11px;font-weight:900}.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--l)}.row:last-child{border:0}.title{display:flex;justify-content:space-between;align-items:center}.title span{font-size:13px;color:var(--mut)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #edf1ee}.check input{width:auto;margin-top:3px;accent-color:var(--g)}.aisle{margin-top:15px;padding-top:8px;border-top:5px solid var(--g)}.aisle h4{margin:0 0 5px;color:var(--g)}.notice{padding:12px;border-radius:12px;background:#fff0db;color:#75451e;font-size:14px}
+@media(max-width:550px){main{padding:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>Our Meal Planner</h1><p>Plan meals, organize groceries, and shop together.</p></header>
+<nav><button data-t="setup" class="active">Setup</button><button data-t="choose">Choose</button><button data-t="plan">Plan</button><button data-t="prep">Prep</button><button data-t="shop">Shop</button></nav>
+<main>
+<section id="setup" class="active"><div class="eyebrow">Start here</div><h2>Set up your plan</h2><div class="card">
+<label>How many weeks?</label><select id="weeks"><option value="1">1 week</option><option value="2" selected>2 weeks</option></select>
+<label>Budget</label><input id="budget" type="number" value="120">
+<label>Stores</label><div id="storeBox"></div><button class="btn light small" onclick="addStore()">＋ Add store</button>
+<label>Ingredients at home</label><textarea id="have">None</textarea>
+<label>Cravings</label><input id="crave" value="Sopa de fideos and an Italian dish">
+<div class="actions"><button class="btn" onclick="saveSetup();show('choose')">Continue</button><button class="btn light" onclick="share()">Share plan</button></div>
+</div><div class="card soft"><strong>Breakfast rule</strong><p>Saturday breakfast only. Each week can be different. Other mornings stay flexible.</p></div></section>
+
+<section id="choose"><div class="eyebrow">Step 1</div><h2>Choose meals</h2><p class="muted">Choose one Mexican dinner and two other dinners per week.</p><div id="mealBox"></div>
+<div class="card"><h3>Saturday breakfasts</h3><div id="breakfastBox"></div><button class="btn light small" onclick="addBreakfast()">＋ Add breakfast</button></div>
+<div class="card"><h3>Snacks</h3><div id="snackBox"></div><button class="btn light small" onclick="addSnack()">＋ Add snack</button></div>
+<div class="actions"><button class="btn" onclick="show('plan')">Build plan</button></div></section>
+
+<section id="plan"><div class="eyebrow">Step 2</div><h2>Our plan</h2><div id="planBox"></div><div class="card"><h3>Add a plan note</h3><input id="note" placeholder="Example: Turn leftovers into tacos"><button class="btn light small" onclick="addNote()">＋ Add note</button><div id="notes"></div></div><div class="actions"><button class="btn" onclick="show('prep')">Preparation</button><button class="btn orange" onclick="show('shop')">Shopping list</button><button class="btn light" onclick="show('choose')">Change meals</button></div></section>
+
+<section id="prep"><div class="eyebrow">Step 3</div><h2>Preparation</h2><div class="card"><h3>Basic prep</h3><div class="check"><span>1.</span><span>Divide chicken into meal portions and freeze Week 2 portions.</span></div><div class="check"><span>2.</span><span>Boil eggs for snacks.</span></div><div class="check"><span>3.</span><span>Wash and chop vegetables.</span></div><div class="check"><span>4.</span><span>Prepare Saturday breakfast ingredients.</span></div></div><div class="card"><h3>Add a preparation step</h3><input id="prepInput" placeholder="Example: Chop onions on Sunday"><button class="btn light small" onclick="addPrep()">＋ Add step</button><div id="prepBox"></div></div><div class="actions"><button class="btn orange" onclick="show('shop')">Go shopping</button></div></section>
+
+<section id="shop"><div class="eyebrow">Shopping mode</div><h2>Shopping list</h2><p class="muted">Check items as you put them in the cart.</p><div class="card"><h3>Add anything</h3><input id="item" placeholder="Item name"><input id="itemStore" placeholder="Store name"><input id="itemAisle" placeholder="Aisle or section"><input id="itemUse" placeholder="What is it for?"><button class="btn light small" onclick="addItem()">＋ Add shopping item</button></div><div id="shopBox"></div><div class="actions"><button class="btn light" onclick="clearChecks()">Uncheck all</button><button class="btn" onclick="share()">Share plan</button></div></section>
+</main>
+</div>
+
+<script>
+var M={1:[
+["sopa","Sopa de fideos with chicken and vegetables","Mexican","One pot • 4–6 servings"],
+["tinga","Chicken tinga tostadas","Mexican","Stovetop • 4–6 servings"],
+["primavera","Italian chicken primavera","Italian","Pasta, chicken, and vegetables"],
+["sheet","Sheet-pan chicken, potatoes, and vegetables","American","Very low effort"],
+["tuna","Tuna and white-bean salad wraps","Mixed","No-cook"]],
+2:[
+["enchiladas","Chicken enchiladas verdes with beans","Mexican","Assemble ahead"],
+["picadillo","Beef and bean picadillo bowls","Mexican","One pan"],
+["fajita","Air-fryer chicken fajita bowls","Mixed","Air fryer"],
+["meatballs","Turkey meatballs with roasted vegetables","Italian-American","Oven or air fryer"],
+["potatoes","Loaded baked potatoes with chili beans","American","Low cost"]]};
+var B={1:[["sandwich","Egg-and-cheese sandwiches plus banana pancakes"],["protein","Protein pancakes with Greek yogurt and fruit"],["burritos","Breakfast burritos with eggs and beans"]],2:[["quesadillas","Breakfast quesadillas with eggs and cheese"],["toast","French toast with eggs and fruit"],["oatmeal","Oatmeal with peanut butter, banana, and boiled eggs"]]};
+var stock=[
+["WinCo","Produce","10–12 apples","Snacks"],["WinCo","Produce","8–10 bananas","Pancakes and snacks"],["WinCo","Produce","2 lb carrots","Sopa de fideos"],["WinCo","Produce","4 zucchini","Sopa de fideos and primavera"],["WinCo","Produce","3 heads broccoli","Primavera and sheet-pan dinner"],["WinCo","Produce","6 bell peppers","Primavera and fajita bowls"],["WinCo","Produce","8 onions and 1 head garlic","All dinners"],["WinCo","Produce","1 cabbage or 2 bags lettuce","Enchiladas and fajita bowls"],["WinCo","Produce","10–12 potatoes","Sheet-pan dinner and loaded potatoes"],["WinCo","Meat / Proteins","2 dozen eggs","Breakfasts and snacks"],["Costco","Meat / Proteins","8–10 lb chicken","All dinners; freeze Week 2 portions"],["WinCo","Dairy / Refrigerated","Milk, shredded cheese, Greek yogurt","Breakfasts and dinners"],["WinCo","Canned / Dry Goods","Fideo, pasta, rice, corn tortillas","Dinners and breakfast quesadillas"],["WinCo","Canned / Dry Goods","Tomatoes, broth, beans, chili beans","Dinners"],["WinCo","Canned / Dry Goods","Green enchilada sauce and salsa","Dinners"],["WinCo","Canned / Dry Goods","Popcorn kernels and flour or oats","Snacks and pancakes"],["WinCo","Sauces / Spices","Italian seasoning, fajita seasoning, baking powder","Cooking"],["WinCo","Sauces / Spices","Garlic powder, chili powder, cumin, salt, pepper, oil","Cooking"]];
+var S={setup:{weeks:2,budget:120,stores:["WinCo","Costco"],have:"None",crave:"Sopa de fideos and an Italian dish"},customM:[],customB:[],customS:[],items:[],notes:[],prep:[],sel:{1:["sopa","primavera","sheet"],2:["enchiladas","fajita","potatoes"]},break:{1:"sandwich",2:"quesadillas"},snacks:["Greek yogurt","Apples with peanut butter","Boiled eggs","Popcorn"],checks:{}};
+function save(){localStorage.mealPlanner=JSON.stringify(S)}
+function load(){try{var x=JSON.parse(localStorage.mealPlanner);if(x)S=Object.assign(S,x,{setup:Object.assign(S.setup,x.setup||{})})}catch(e){}}
+function e(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function show(t){document.querySelectorAll("section").forEach(function(x){x.classList.remove("active")});document.getElementById(t).classList.add("active");document.querySelectorAll("nav button").forEach(function(x){x.classList.toggle("active",x.dataset.t===t)});if(t==="setup")setup();if(t==="choose")choose();if(t==="plan")plan();if(t==="prep")prep();if(t==="shop")shop();scrollTo(0,0)}
+document.querySelectorAll("nav button").forEach(function(x){x.onclick=function(){show(x.dataset.t)}})
+function setup(){document.getElementById("weeks").value=S.setup.weeks;document.getElementById("budget").value=S.setup.budget;document.getElementById("have").value=S.setup.have;document.getElementById("crave").value=S.setup.crave;document.getElementById("storeBox").innerHTML=S.setup.stores.map(function(x){return'<div class="choice selected"><input type="checkbox" checked onchange="toggleStore('+JSON.stringify(x)+')"><span><strong>'+e(x)+'</strong></span><button class="btn danger small" onclick="removeStore('+JSON.stringify(x)+')">Remove</button></div>'}).join("")}
+function saveSetup(){S.setup.weeks=+weeks.value;S.setup.budget=+budget.value||120;S.setup.have=have.value;S.setup.crave=crave.value;save()}
+function addStore(){var x=prompt("Store name:");if(x&&!S.setup.stores.includes(x.trim())){S.setup.stores.push(x.trim());save();setup()}}
+function removeStore(x){if(S.setup.stores.length>1){S.setup.stores=S.setup.stores.filter(function(y){return y!==x});save();setup()}}
+function toggleStore(x){if(S.setup.stores.includes(x)){if(S.setup.stores.length>1)S.setup.stores=S.setup.stores.filter(function(y){return y!==x})}else S.setup.stores.push(x);save();setup()}
+function meals(w){return M[w].concat(S.customM.filter(function(x){return x.w===w}))}
+function breakfasts(w){return B[w].concat(S.customB.filter(function(x){return x.w===w}))}
+function opt(x,g,on,type){return'<label class="choice '+(on?"selected":"")+'"><input type="'+type+'" name="'+g+'" value="'+e(x[0])+'" '+(on?"checked":"")+' onchange="change(this,'+JSON.stringify(g)+')"><span><strong>'+e(x[1])+'</strong><small>'+e(x[2]||"Saturday breakfast")+(x[3]?" • "+e(x[3]):"")+'</small></span></label>'}
+function choose(){var h="";for(var w=1;w<=S.setup.weeks;w++){var a=meals(w),z=S.sel[w]||[];h+='<div class="card"><div class="title"><h3>Week '+w+' dinners</h3><span>1 Mexican + 2 others</span></div><p class="muted">Mexican dinner</p>'+a.filter(function(x){return x[2]==="Mexican"}).map(function(x){return opt(x,"mex"+w,z.includes(x[0]),"radio")}).join("")+'<p class="muted">Other dinners</p>'+a.filter(function(x){return x[2]!=="Mexican"}).map(function(x){return opt(x,"other"+w,z.includes(x[0]),"checkbox")}).join("")+'<button class="btn light small" onclick="addMeal('+w+')">＋ Add custom meal</button></div>'}mealBox.innerHTML=h;var b="";for(var w=1;w<=S.setup.weeks;w++){b+='<p class="muted">Week '+w+'</p>'+breakfasts(w).map(function(x){return opt(x,"break"+w,S.break[w]===x[0],"radio")}).join("")}breakfastBox.innerHTML=b;var n=["Greek yogurt","Apples with peanut butter","Boiled eggs","Popcorn","Carrots with hummus"].concat(S.customS);snackBox.innerHTML=n.map(function(x){return'<label class="choice '+(S.snacks.includes(x)?"selected":"")+'"><input type="checkbox" '+(S.snacks.includes(x)?"checked":"")+' onchange="snack('+JSON.stringify(x)+',this.checked)"><span><strong>'+e(x)+'</strong></span></label>'}).join("")}
+function change(i,g){var w=+g.replace(/\D/g,"");if(g.indexOf("mex")===0){S.sel[w]=S.sel[w].filter(function(id){return!meals(w).some(function(m){return m[0]===id&&m[2]==="Mexican"})});if(i.checked)S.sel[w].push(i.value)}else if(g.indexOf("other")===0){var o=S.sel[w].filter(function(id){return meals(w).some(function(m){return m[0]===id&&m[2]!=="Mexican"})});if(i.checked&&o.length>=2){i.checked=false;alert("Choose only two other dinners.");return}if(i.checked)o.push(i.value);else o=o.filter(function(id){return id!==i.value});S.sel[w]=S.sel[w].filter(function(id){return!meals(w).some(function(m){return m[0]===id&&m[2]!=="Mexican"})}).concat(o)}else S.break[w]=i.value;save();choose()}
+function addMeal(w){var n=prompt("Meal name:");if(!n)return;var t=prompt("Type: Mexican, American, Mixed, Italian, or another style","Mixed")||"Mixed";S.customM.push(["cm"+Date.now(),n,t,"Custom meal",w]);var x=S.customM[S.customM.length-1];x.w=w;save();choose()}
+function addBreakfast(){var w=+prompt("Which week? 1 or 2","1");if(w!==1&&w!==2)return;var n=prompt("Breakfast name:");if(!n)return;var id="cb"+Date.now();S.customB.push([id,n,"Saturday breakfast"]);S.customB[S.customB.length-1].w=w;S.break[w]=id;save();choose()}
+function addSnack(){var n=prompt("Snack name:");if(n&&!S.customS.includes(n)){S.customS.push(n);S.snacks.push(n);save();choose()}}
+function snack(x,on){if(on&&!S.snacks.includes(x))S.snacks.push(x);if(!on)S.snacks=S.snacks.filter(function(y){return y!==x});save();choose()}
+function find(w,id){return meals(w).find(function(x){return x[0]===id})}
+function findB(w,id){return breakfasts(w).find(function(x){return x[0]===id})}
+function plan(){var h="";for(var w=1;w<=S.setup.weeks;w++){h+='<div class="card"><div class="title"><h3>Week '+w+'</h3><span>3 dinners</span></div><div class="row"><div><small>Saturday breakfast</small><br><strong>'+e((findB(w,S.break[w])||[])[1]||"Choose one")+'</strong></div></div>';S.sel[w].forEach(function(id,i){var m=find(w,id);if(m)h+='<div class="row"><div><small>'+["Monday","Wednesday","Friday"][i]+'</small><br><strong>'+e(m[1])+'</strong></div><span class="tag">'+e(m[2])+'</span></div>'});h+='<div class="row"><div><small>Lunches</small><br><strong>Leftovers, bowls, tacos, or wraps</strong></div></div><div class="row"><div><small>Snacks</small><br><strong>'+e(S.snacks.join(", ")||"Flexible")+'</strong></div></div></div>'}h+='<div class="notice"><strong>Settings:</strong> '+S.setup.weeks+' week(s), $'+S.setup.budget+', shopping at '+e(S.setup.stores.join(", "))+'.</div>';planBox.innerHTML=h;notes.innerHTML=S.notes.map(function(x,i){return'<div class="check"><span>•</span><span>'+e(x)+'</span><button class="btn danger small" onclick="S.notes.splice('+i+',1);save();plan()">Delete</button></div>'}).join("")}
+function addNote(){var x=note.value.trim();if(x){S.notes.push(x);note.value="";save();plan()}}
+function prep(){prepBox.innerHTML=S.prep.map(function(x,i){return'<div class="check"><span>•</span><span>'+e(x)+'</span><button class="btn danger small" onclick="S.prep.splice('+i+',1);save();prep()">Delete</button></div>'}).join("")}
+function addPrep(){var x=prepInput.value.trim();if(x){S.prep.push(x);prepInput.value="";save();prep()}}
+function addItem(){var n=item.value.trim();if(!n)return;var s=itemStore.value.trim()||S.setup.stores[0],a=itemAisle.value.trim()||"Other",u=itemUse.value.trim()||"Custom item";S.items.push([s,a,n,u]);if(!S.setup.stores.includes(s))S.setup.stores.push(s);item.value=itemStore.value=itemAisle.value=itemUse.value="";save();shop()}
+function shop(){var all=stock.concat(S.items),h='<div class="card soft"><strong>Shopping tip:</strong><p>Use WinCo for smaller quantities and Costco for bulk items you can freeze or use.</p></div>';S.setup.stores.forEach(function(s){var rows=all.filter(function(x){return x[0]===s});h+='<div class="card"><h3>'+e(s)+'</h3>';[...new Set(rows.map(function(x){return x[1]}))].forEach(function(a){h+='<div class="aisle"><h4>'+e(a)+'</h4>';rows.filter(function(x){return x[1]===a}).forEach(function(x){var k=x[0]+"|"+x[1]+"|"+x[2];h+='<label class="check"><input type="checkbox" '+(S.checks[k]?"checked":"")+' onchange="S.checks['+JSON.stringify(k)+']=!S.checks['+JSON.stringify(k)+'];save()"><span><strong>'+e(x[2])+'</strong><br><small class="muted">'+e(x[3])+'</small></span></label>'});h+='</div>'});if(!rows.length)h+='<p class="muted">No items yet.</p>';h+='</div>'});h+='<div class="card"><h3>Check at home</h3><div class="check"><input type="checkbox"><span>Cooking oil</span></div><div class="check"><input type="checkbox"><span>Salt and pepper</span></div><div class="check"><input type="checkbox"><span>Seasonings</span></div><div class="check"><input type="checkbox"><span>Freezer bags and containers</span></div></div><div class="notice">Estimated total: about $110–$130 depending on current prices.</div>';shopBox.innerHTML=h}
+function clearChecks(){S.checks={};save();shop()}
+function share(){save();var d=btoa(unescape(encodeURIComponent(JSON.stringify(S)))),u=location.origin+location.pathname+"#plan="+d;if(navigator.clipboard)navigator.clipboard.writeText(u).then(function(){alert("Share link copied.")});else prompt("Copy this link:",u)}
+function shared(){if(!location.hash.startsWith("#plan="))return;try{S=Object.assign(S,JSON.parse(decodeURIComponent(escape(atob(location.hash.substring(6))))));save()}catch(e){}}
+load();shared();setup();
+</script>
+</body>
+</html>
